@@ -2,6 +2,7 @@ package com.springboot.hotelreservation.service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,9 +28,10 @@ public class ReservationService {
 	@Autowired
 	private ReservationRepository reservationRepository;
 
-	public void addGuest(Guest guest) {
+	public Guest addGuest(Guest guest) {
 		// TODO Auto-generated method stub
 		guestRepository.save(guest);
+		return guest;
 	}
 
 	public List<Guest> findGuests() {
@@ -50,7 +52,8 @@ public class ReservationService {
 	public void addReservation(Reservation reservation) {
 		// TODO Auto-generated method stub
 		reservationRepository.save(reservation);
-		Room room = changeStatus(reservation);
+		Optional<Room> optroom=roomRepository.findById(reservation.getRoomNo());
+		Room room = optroom.get();//changeStatus(reservation);
 		room.setOccupied("yes");
 		roomRepository.save(room);
 	}
@@ -58,12 +61,42 @@ public class ReservationService {
 	public void endReservation(Reservation reservation) {
 		// TODO Auto-generated method stub
 		reservationRepository.delete(reservation);
-		Room room = changeStatus(reservation);
+		Optional<Room> optroom=roomRepository.findById(reservation.getRoomNo());
+		Room room = optroom.get();
+		//Room room = changeStatus(reservation);
 		room.setOccupied("no");
 		roomRepository.save(room);
 	}
 
-	public Room changeStatus(Reservation reservation) {
+	public Guest findGuestById(long id) {
+		// TODO Auto-generated method stub
+	    Optional<Guest> optGuest = guestRepository.findById((int)id);
+	     Guest guest = null;
+	    if(optGuest.isPresent())
+	      guest= optGuest.get();
+	/*	Guest guest = Stream.of((int)id).
+				      map(guestRepository::findById).
+				      filter(Optional::isPresent).
+				      map(Optional::get).
+				      collect(toSingleton));*/
+	    if(guest==null)
+	    	throw new UserNotFoundException("id :"+id);
+	    return guest;
+	   
+	}
+
+	public Room findRoomById(long id) {
+		// TODO Auto-generated method stub
+		Optional<Room> optRoom = roomRepository.findById((int)id);
+	     Room room = null;
+	    if(optRoom.isPresent())
+	      room= optRoom.get();
+	    if(room==null)
+	    	throw new UserNotFoundException("id :"+id);
+	    return room;
+	}
+
+/*	public Room changeStatus(Reservation reservation) {
 		List<Room> rooms = roomRepository.findAll();
 		Room room = null;
 		for (Room room1 : rooms)
@@ -71,5 +104,5 @@ public class ReservationService {
 				room = room1;
 		return room;
 
-	}
+	}*/
 }
