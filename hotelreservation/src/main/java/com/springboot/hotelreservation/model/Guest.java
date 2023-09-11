@@ -13,7 +13,7 @@ public class Guest {
 	
 	@Id
 	int guestId;
-	@Size(min=4)
+	@Size(min=4,message="Name Should have atleast 4 characters")
 	String guestName;//="guest";
 	@Size(min=8,max=10)
 	String contact;
